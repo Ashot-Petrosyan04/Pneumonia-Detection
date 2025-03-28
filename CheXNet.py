@@ -27,7 +27,7 @@ class ChestXRayDataset(Dataset):
                 pathologies = items[1].strip('"').split('|')
                 label = 1.0 if 'Pneumonia' in pathologies else 0.0
                 self.image_paths.append(img_path)
-                self.labels.append(label)  # Simplified to scalar
+                self.labels.append(label)
 
         if self.phase == 'train':
             self.transform = transforms.Compose([

@@ -1,1 +1,1 @@
-
+Put the images from the dataset in this folder.

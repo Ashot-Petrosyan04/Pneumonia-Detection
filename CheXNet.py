@@ -25,7 +25,8 @@ class ChestXRayDataset(Dataset):
                 items = line.strip().split(',')
                 img_path = os.path.join('sample/images/', items[0].strip('"'))
                 pathologies = items[1].strip('"').split('|')
-                label = 1.0 if 'Pneumonia' in pathologies else 0.0
+                target_pathologies = {'Nodule', 'Mass'}
+                label = 1.0 if any(p in target_pathologies for p in pathologies) else 0.0
                 self.image_paths.append(img_path)
                 self.labels.append(label)
 

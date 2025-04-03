@@ -5,7 +5,9 @@ This repository contains the implementation of the following paper https://www.o
 # Image data
 Link to the paper NIH Chest X-rays (https://arxiv.org/pdf/1711.05225)
 
-Link to the dataset NIH Chest X-rays (https://www.kaggle.com/datasets/nih-chest-xrays/sample)
+Link to the dataset Random Sample of NIH Chest X-ray (https://www.kaggle.com/datasets/nih-chest-xrays/sample)
+
+Link to the dataset NIH Chest X-rays (https://www.kaggle.com/datasets/nih-chest-xrays/data)
 
 # Tabular data
 Link to the paper Lung Cancer1 (https://www.mdpi.com/2504-2289/6/4/139#B41-BDCC-06-00139)

@@ -18,6 +18,8 @@ sampled_no_finding = no_finding_df.sample(n=num_mass_nodule,
 
 balanced_df = pd.concat([mass_nodule_df, sampled_no_finding])
 
+balanced_df.to_csv('balanced_data.csv', index=False)
+
 folder_ranges = [
     (1335, 6, 'images_001'),
     (3923, 13, 'images_002'),

@@ -20,14 +20,14 @@ class ChestXRayDataset(Dataset):
         self.phase = phase
         self.normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         
-        with open('sample_labels.csv', 'r') as f:
+        with open('balanced_data.csv', 'r') as f:
             next(f)
             for line in f:
                 items = line.strip().split(',')
-                img_path = os.path.join('sample/images/', items[0].strip('"'))
                 pathologies = items[1].strip('"').split('|')
                 target_pathologies = {'Nodule', 'Mass'}
                 label = 1.0 if any(p in target_pathologies for p in pathologies) else 0.0
+                img_path = os.path.join('no_finding/' if label == 0.0 else 'mass_nodule_finding/', items[0].strip('"'))
                 self.image_paths.append(img_path)
                 self.labels.append(label)
 
@@ -57,12 +57,16 @@ class DenseNet121(nn.Module):
     def __init__(self):
         super().__init__()
         self.densenet = torchvision.models.densenet121(weights="IMAGENET1K_V1")
+
+        for param in self.densenet.parameters():
+            param.requires_grad = False
+
         num_features = self.densenet.classifier.in_features
         self.densenet.classifier = nn.Linear(num_features, 1)
 
     def forward(self, x):
         return self.densenet(x)
-
+    
 class VGG16Model(nn.Module):
     def __init__(self):
         super().__init__()
@@ -110,7 +114,7 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, test_loader,
             optimizer.step()
             train_loss += loss.item() * images.size(0)
             print(train_loss)
-        
+
         model.eval()
         val_loss = 0.0
         with torch.no_grad():
@@ -165,6 +169,8 @@ def train_and_evaluate(model, model_name, train_loader, val_loader, test_loader,
     plt.savefig(f"{model_name}_roc_curve.png")
     plt.close()
     
+    torch.save(model.state_dict(), f"{model_name}_final_model.pth")
+    
     return {'accuracy': accuracy, 'precision': precision, 'recall': recall, 'f1': f1, 'auc': auc}
 
 def main():
@@ -180,24 +186,22 @@ def main():
     pos_count = sum(full_dataset.labels[i] for i in train_dataset.indices)
     neg_count = len(train_dataset) - pos_count
     pos_weight = torch.tensor([neg_count/pos_count])
-
+    
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
-    # Define models for transfer learning
     models = {
         "DenseNet121": DenseNet121(),
-        "VGG16": VGG16Model(),
-        "InceptionNet": InceptionNetModel(),
-        "ResNet": ResNetModel()
+        # "VGG16": VGG16Model(),
+        # "InceptionNet": InceptionNetModel(),
+        # "ResNet": ResNetModel()
     }
     
     results = {}
     for name, model in models.items():
         results[name] = train_and_evaluate(model, name, train_loader, val_loader, test_loader, pos_weight)
     
-    # Compare models based on F1 score
     best_model = max(results.items(), key=lambda x: x[1]['f1'])
     print("----- Overall Results -----")
     for model_name, metrics in results.items():

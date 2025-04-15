@@ -1,3 +1,4 @@
+import timm
 import os
 import torch
 from torch.utils.data import Dataset, random_split, DataLoader
@@ -97,6 +98,36 @@ class ResNetModel(nn.Module):
     def forward(self, x):
         return self.resnet(x)
 
+class XceptionNetModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.xception = timm.create_model('xception', pretrained=True)
+
+        for param in self.xception.parameters():
+            param.requires_grad = False
+        
+        num_features = self.xception.get_classifier().in_features
+        self.xception.reset_classifier(1)
+        self.classifier = nn.Linear(num_features, 1)
+
+    def forward(self, x):
+        features = self.xception.forward_features(x)
+        return self.classifier(features)
+
+class MobileNetV2Model(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.mobilenet = torchvision.models.mobilenet_v2(weights=torchvision.models.MobileNet_V2_Weights.IMAGENET1K_V1)
+
+        for param in self.mobilenet.features.parameters():
+            param.requires_grad = False
+
+        num_features = self.mobilenet.classifier[1].in_features
+        self.mobilenet.classifier[1] = nn.Linear(num_features, 1)
+
+    def forward(self, x):
+        return self.mobilenet(x)
+
 def train_and_evaluate(model, model_name, train_loader, val_loader, test_loader, pos_weight):
     optimizer = optim.Adam(model.parameters(), lr=LR, betas=(0.9, 0.999))
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.1, patience=1)
@@ -195,7 +226,9 @@ def main():
         "DenseNet121": DenseNet121(),
         # "VGG16": VGG16Model(),
         # "InceptionNet": InceptionNetModel(),
-        # "ResNet": ResNetModel()
+        # "ResNet": ResNetModel(),
+        #  "MobileNetV2": MobileNetV2Model(),
+        #  "XceptionNet": XceptionNetModel()
     }
     
     results = {}

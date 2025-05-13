@@ -34,6 +34,8 @@ https://node21.grand-challenge.org/
 
 https://link.springer.com/article/10.1007/s11548-024-03227-7#Sec3
 
+https://pmc.ncbi.nlm.nih.gov/articles/PMC8587284/?utm_source=chatgpt.com#sec3-sensors-21-07116
+
 # Github
 https://github.com/rahulcoding/CheXNet
 

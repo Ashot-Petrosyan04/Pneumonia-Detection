@@ -1,5 +1,3 @@
-This repository contains the implementation of the following paper https://www.overleaf.com/read/btmvqvrfqgwg#41e3ac
-
 # References
 
 # Image data
